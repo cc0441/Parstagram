@@ -27,7 +27,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='250' alt='Video Walkthrough' />
+<img src='https://github.com/cc0441/Parstagram/blob/859b256291204deff37ebf26a3ae7e41085d7f0f/walkthrough.gif' title='Video Walkthrough' width='250' alt='Video Walkthrough' />
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
