@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.parstagram.MainActivity
 import com.example.parstagram.Post
 import com.example.parstagram.PostAdapter
@@ -21,12 +22,14 @@ open class HomeFragment : Fragment() {
     lateinit var postsRecyclerView: RecyclerView
     lateinit var adapter: PostAdapter
     var allPosts: MutableList<Post> = mutableListOf()
+    lateinit var swipeContainer: SwipeRefreshLayout
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_home, container, false)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -38,11 +41,22 @@ open class HomeFragment : Fragment() {
         //2. Create data source for each row(this is the post class)
         //3. Create adapter that will bridge data and row layout
         //4. set adapter on Recyclerview
-        adapter = PostAdapter(requireContext(), allPosts)
+        adapter = PostAdapter(requireContext(), allPosts as ArrayList<Post>)
         postsRecyclerView.adapter = adapter
         //5. set layout manager on Recyclerview
         postsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         queryPosts()
+
+        swipeContainer = view.findViewById(R.id.swipeContainer)
+
+        swipeContainer.setOnRefreshListener {
+            queryPosts()
+        }
+
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+            android.R.color.holo_green_light,
+            android.R.color.holo_orange_light,
+            android.R.color.holo_red_light);
     }
 
     open fun queryPosts() {
@@ -52,8 +66,10 @@ open class HomeFragment : Fragment() {
         query.include(Post.KEY_USER)
         // Return posts in decending order: ie newer posts will appear first
         query.addDescendingOrder("createdAt")
+        query.setLimit(20)
         query.findInBackground(object: FindCallback<Post> {
             override fun done(posts: MutableList<Post>?, e: ParseException?) {
+                adapter.clear()
                 if(e != null) {
                     Log.e(MainActivity.TAG, "error for fetching posts")
                 }else {
@@ -62,7 +78,9 @@ open class HomeFragment : Fragment() {
                             Log.i(MainActivity.TAG, "Post: " + post.getDescription() + " User: " + post.getUser()?.username)
                         }
                         allPosts.addAll(posts)
+                        adapter.addAll(posts)
                         adapter.notifyDataSetChanged()
+                        swipeContainer.setRefreshing(false)
                     }
                 }
             }
